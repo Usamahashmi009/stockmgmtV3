@@ -1,0 +1,55 @@
+    {% load static %}
+    {% include 'navbar.html'%}
+
+    
+    <form
+        hx-post="{% url 'create-form' %}" 
+        hx-on="htmx:afterRequest: this.remove()"
+        hx-trigger="click from:#submit-all">
+
+        
+        
+        <div class="form-row">
+            <div class="form-group col">
+            <label for="{{ form.stock.id_for_label }}">{{ form.stock.label }}</label>
+            {% csrf_token %}
+            {{ form.stock }}
+        </div>
+        
+        <div class="form-group col">
+            <label for="{{ form.rate.id_for_label }}">{{ form.rate.label }}</label>
+            {% csrf_token %}
+            {{ form.rate }}
+        </div>
+
+        <div class="form-group col">
+            <label for="{{ form.sale_quantity.id_for_label }}">{{ form.sale_quantity.label }}</label>
+            {% csrf_token %}
+            {{ form.sale_quantity }}
+        </div>
+        
+        <div class="form-group col">
+            <label for="{{ form.received_by.id_for_label }}">{{ form.received_by.label }}</label>
+            {% csrf_token %}
+            {{ form.received_by }}
+        </div>
+        
+        <div class="form-group col">
+            <label for="{{ form.account_recieveable.id_for_label }}">{{ form.account_recieveable.label }}</label>
+            {% csrf_token %}
+            {{ form.account_recieveable }}
+        </div>
+
+
+
+    </div>
+    
+    <section class="message" id="message" hx-swap-oob="true" hx-swap="innerHTML">
+        {% include 'toast.html' %}
+    </section>
+
+</form>
+
+
+
+

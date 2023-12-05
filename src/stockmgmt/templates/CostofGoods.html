@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .bd-placeholder-img {
+      font-size: 1.125rem;
+      text-anchor: middle;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    @media (min-width: 768px) {
+      .bd-placeholder-img-lg {
+        font-size: 3.5rem;
+      }
+    }
+
+    
+
+
+/* Style for the confirmation pop-up */
+  .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+  }
+
+  .confirmation-box {
+          background-color: #fff;
+          padding: 20px;
+          border-radius: 5px;
+          text-align: center;
+      }
+
+      .confirmation-box button {
+          margin: 5px;
+      }
+</style>
+
+  
+
+    <h2>Cost of Goods sold</h2>
+    
+    
+    <br>
+    <table class='table'>
+        <thead>
+            <tr>
+                <th>Date/Time</th>
+                <th>Category</th>
+                <th>Item Name</th>
+                <th>Sale Quantity</th>
+                <th>Stock Rate</th>
+                <th>Total Values</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for values in total_values_list %}
+                <tr>
+                    <td>{{ values.sale_datetime }}</td>
+                    <td>{{ values.category }}</td>
+                    <td>{{ values.item_name }}</td>
+                    <td>{{ values.sale_quantity }}</td>
+                    <td>{{ values.stock_rate }}</td>
+                    <td>{{ values.total_values }}</td>
+                    {% comment %} <td><a href="#" onclick="showDeleteConfirmation('{{ values.stock_rate }}', '{% url 'delete_sale' entry.id %}')">Delete</a></td> {% endcomment %}
+
+                </tr>
+            {% endfor %}
+            
+        </tbody>
+    </table>
+
+
+    
+  <!-- Confirmation Pop-up -->
+  <div class="overlay" id="confirmationOverlay">
+    <div class="confirmation-box">
+        <h2>Confirm Deletion</h2>
+        <p id="confirmationText"></p>
+        <form method="post" action="" id="confirmationForm">
+            {% csrf_token %}
+            <button type="submit">Delete</button>
+        </form>
+        <button onclick="hideConfirmation()">Cancel</button>
+    </div>
+</div>
+
+<script>
+    function showDeleteConfirmation(price, deleteUrl) {
+        document.getElementById('confirmationText').innerHTML = "Are you sure you want to delete " + price + "?";
+        document.getElementById('confirmationForm').action = deleteUrl;
+        document.getElementById('confirmationOverlay').style.display = 'flex';
+    }
+
+    function hideConfirmation() {
+        document.getElementById('confirmationOverlay').style.display = 'none';
+    }
+</script>
+{% endblock %}

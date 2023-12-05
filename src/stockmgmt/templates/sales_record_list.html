@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Record List</title>
+</head>
+{% block content %}
+<body>
+    <h1>Sales Record List</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Sale Quantity</th>
+                <th>Sale Date</th>
+                <th>Rate</th>
+                <th>Received By</th>
+                <th>Account Receivable</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sale in sales_data %}
+                <tr>
+                    <td>{{ sale.stock }}</td>
+                    <td>{{ sale.sale_quantity }}</td>
+                    <td>{{ sale.sale_date }}</td>
+                    <td>{{ sale.rate }}</td>
+                    <td>{{ sale.received_by }}</td>
+                    <td>{{ sale.account_recieveable }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endblock %}
+</body>
+</html>
