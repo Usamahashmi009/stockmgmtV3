@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+
+
+{% block content %}
+    <h1>Purchase Record List</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Stock</th>
+                <th>Purchase Quantity</th>
+                <th>Purchase Date</th>
+                <th>Rate</th>
+                <th>Account Payable</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for purchase in purchase_data %}
+                <tr>
+                    <td>{{ purchase.item_name }}</td>
+                    <td>{{ purchase.quantity }}</td>
+                    <td>{{ purchase.timestamp }}</td>
+                    <td>{{ purchase.rate }}</td>
+                    <td>{{ purchase.account_payable }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

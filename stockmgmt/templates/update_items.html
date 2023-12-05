@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update</title>
+</head>
+<body>
+    {% block content %}
+    <h2>Update Items </h2>
+    <br>
+    <form method="post" action="">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class= 'btn btn-primary'>Update</button>
+    </form>
+    
+    {% endblock %}
+</body>
+</html>
+

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Account Payable</h2>
+    <br>
+
+    <table class='table'>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Vender</th>
+                <th>Item Name</th>
+                <th>Quantity</th>
+                <th>Rate</th>
+                <th>Amount Payable</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in stock_entries %}
+            <tr>
+                <td>{{ entry.id }}</td>
+                <td>{{ entry.vender.name }}</td>
+                <td>{{ entry.item_name.name }}</td>
+                <td>{{ entry.quantity }}</td>
+                <td>{{ entry.rate }}</td>
+                <td>{{ entry.account_payable }}</td>
+                <td>{{ entry.timestamp|date:"Y-m-d H:i:s" }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

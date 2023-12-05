@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+
+
+    {{ form.course.label_tag }}
+    {% render_field form.course class="custom-select mb-4" autocomplete="off" hx-get="/modules/" hx-target="#modules" %}
+  
+  
+    {{ form.modules.label_tag }}
+    {% render_field form.modules class="custom-select mb-4" autocomplete="off" %}
+
+{% endblock %}
