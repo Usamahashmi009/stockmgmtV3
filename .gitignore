@@ -1,4 +1,4 @@
-.venv/
+venv/
 djangoproject/__pycache__/
 stockmgmt/__pycache__/
 stockmgmt/migrations/__pycache__/
