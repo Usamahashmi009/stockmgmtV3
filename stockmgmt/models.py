@@ -3,12 +3,6 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
-class Category(models.Model):
-    name = models.CharField(max_length=50, blank=True, null=True)
-
-    def __str__(self):
-        return self.name
-
 
 # class Category(models.Model):
 # 	name = models.CharField(max_length=50, blank=True, null=True)
@@ -35,14 +29,56 @@ class Expense(models.Model):
 
     def __str__(self):
         return self.name
+    
+    
+class Category(models.Model):
+    name = models.CharField(max_length=50, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
 
 
 class Itemsmodel(models.Model):
-    # category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='items')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='items')
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
+    
+    
+class Stock(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True)
+    item_name = models.ForeignKey(Itemsmodel, on_delete=models.CASCADE, blank=True)
+    quantity = models.IntegerField(default='0', blank=True, null=True)
+    rate = models.IntegerField(default='0', blank=True, null=True)
+    account_payable = models.IntegerField(default='0', blank=True, null=True)
+    
+    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
+    vender = models.ForeignKey(Vender, on_delete=models.SET_NULL, null=True)
+    receive_quantity = models.IntegerField(default='0', blank=True, null=True)
+    receive_by = models.CharField(max_length=50, blank=True, null=True)
+    addcash = models.IntegerField(default='0', blank=True, null=True)
+    issue_quantity = models.IntegerField(default='0', blank=True, null=True)
+    issue_by = models.CharField(max_length=50, blank=True, null=True)
+    issue_to = models.CharField(max_length=50, blank=True, null=True)
+    phone_number = models.CharField(max_length=50, blank=True, null=True)
+    created_by = models.CharField(max_length=50, blank=True, null=True)
+    reorder_level = models.IntegerField(default='0', blank=True, null=True)
+    lastupdate = models.DateTimeField(auto_now_add=False, auto_now=True)
+    timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    Expense_category = models.ForeignKey(Expense, on_delete=models.CASCADE,null=True, blank=True)
+    batch_number = models.CharField(max_length=10, blank=True, null=True)
+    
+    
+    @property
+    def subtotal(self):
+        return self.quantity * self.rate
+
+    def __str__(self):
+        return str(self.item_name)
+    
+    
 
 class DefectiveItem(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)  # Adjust the relationship as needed
@@ -170,5 +206,3 @@ class OwnerEquity(models.Model):
 
     def __str__(self):
         return str(self.capital)
-
-

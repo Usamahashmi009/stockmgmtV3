@@ -22,10 +22,6 @@ from .forms import SignUpForm, EditUserprofileForm , EditAdminprofileForm
 from django.contrib.auth.models import User
 
 
-
-
-
-
 @login_required
 def home(request):
     if request.user.is_authenticated==True:
@@ -40,16 +36,21 @@ def home(request):
         return redirect('user_login')
 
 def list_item(request):
-    if request.user.is_authenticated==True:
-    
+    if request.user.is_authenticated == True:
+        categories = Category.objects.all()
+        items = Itemsmodel.objects.all()
         title = 'Stock List'
         form = StockSearchForm(request.POST or None)
         queryset = Stock.objects.all()
-        
+
         context = {
             "title": title,
             "queryset": queryset,
-            "form": form
+            "form": form,
+            "categories": categories,
+            "items": items,
+            'category_name': None,
+            'item_name': None,
         }
         
         if request.method == 'POST':
@@ -62,38 +63,40 @@ def list_item(request):
 
                 if item_name:
                     queryset = queryset.filter(item_name__name__icontains=item_name)
-            if form['export_to_CSV'].value() == True:
-                response = HttpResponse(content_type='text/csv')
-                response['Content-Disposition'] = 'attachment; filename="List of stock.csv"'
-                writer = csv.writer(response)
-                writer.writerow(['CATEGORY', 'ITEM NAME', 'QUANTITY'])
                 
-                for stock in queryset:
-                    writer.writerow([stock.category.name, stock.item_name, stock.quantity])
+                context.update({
+                    'category_name': category_name,
+                    'item_name': item_name,
+                })
                 
-                return response
+                if form['export_to_CSV'].value() == True:
+                    response = HttpResponse(content_type='text/csv')
+                    response['Content-Disposition'] = 'attachment; filename="List of stock.csv"'
+                    writer = csv.writer(response)
+                    writer.writerow(['CATEGORY', 'ITEM NAME', 'QUANTITY'])
+                    
+                    for stock in queryset:
+                        writer.writerow([stock.category.name, stock.item_name, stock.quantity])
+                    
+                    return response
 
-        context["form"] = form
         context["queryset"] = queryset
-
         return render(request, "list_item.html", context)
     else:
         return redirect('user_login')
 
-def Add_itemTriger(request):
-    if request.user.is_authenticated==True:
-        context = {'form': StockCreateForm()}
-        messages.success(request, 'Successfully Saved')
-        return render(request, 'itemindex.html', context)
-    else:
-        return redirect('user_login')
 
-def add_items(request):
+
+from django.shortcuts import render, redirect
+from .forms import StockCreateForm  # Import your form
+from .models import Stock
+
+def stock_create_view(request):
     if request.user.is_authenticated==True:
         if request.method == 'POST':
             form = StockCreateForm(request.POST)
             if form.is_valid():
-                item_name = form.cleaned_data['item_name']
+                item_name = form.cleaned_data['item']
                 category = form.cleaned_data['category']
                 account_payable = form.cleaned_data['account_payable']
                 quantity = form.cleaned_data['quantity']  
@@ -117,27 +120,35 @@ def add_items(request):
                         cash=existing_item,
                     )
                     action_history.save()
+                    return redirect('list_item')
                 else:
                 
                     # If the item doesn't exist, create a new batch number
                     existing_items_same_name_category = Stock.objects.filter(item_name=item_name, category=category)
                     if existing_items_same_name_category.exists():
-                        # If items with the same name and category exist, get the highest batch number and increment
-                        highest_batch = existing_items_same_name_category.order_by('-batch_number').first().batch_number
-                        if highest_batch.startswith('B-'):
+                        highest_batch_item = existing_items_same_name_category.order_by('-batch_number').first()
+                        if highest_batch_item.batch_number and highest_batch_item.batch_number.startswith('B-'):
                             batch_number_prefix = 'B-'
-                            batch_number_suffix = int(highest_batch.split('-')[1]) + 1
+                            batch_number_suffix = int(highest_batch_item.batch_number.split('-')[1]) + 1
                             batch_number = f'{batch_number_prefix}{batch_number_suffix:02d}'
                         else:
-                            # If the batch number doesn't follow the expected pattern, set it to 'B-01'
+                            # Set the batch number to a default value if it doesn't follow the expected pattern
                             batch_number = 'B-01'
                     else:
                         # If no items with the same name and category exist, set the batch number to 'B-01'
                         batch_number = 'B-01'
+
                     # Set the batch number in the form data
                     form.instance.batch_number = batch_number
+
+                    # Get the cleaned data from the 'item' field in the form
+                    selected_item = form.cleaned_data['item']
+                    # Assign the selected item to the 'item_name' field in the form instance
+                    form.instance.item_name = selected_item
+
                     # Save the form and get the instance
                     instance = form.save()
+
                     # Calculate the total value of the stock item added
                     total_value = instance.quantity * instance.rate
                     total_value -= instance.account_payable
@@ -154,6 +165,7 @@ def add_items(request):
                     )
                     action_history.save()
 
+                    return redirect('list_item')  # Redirect to a success URL after successful form submission
         else:
             form = StockCreateForm()
 
@@ -161,9 +173,39 @@ def add_items(request):
             "form": form,
         }
 
-        return render(request, "purchase_forms.html", context)
+        return render(request, 'stock_create_view.html', context)
     else:
-        return redirect('user_login')
+        return redirect('user_login') # Redirect to login page if user is not authenticated
+
+
+
+
+
+
+
+def my_new_load_item(request):  # Updated view name
+    category_id = request.GET.get('category_id')
+    items = Itemsmodel.objects.filter(category_id=category_id)
+    data = [{'id': item.id, 'name': item.name} for item in items]
+    return JsonResponse(data, safe=False)
+
+
+from django.http import JsonResponse
+from .models import Itemsmodel  # Import your Itemsmodel
+
+def get_items_by_category(request):
+    if request.is_ajax() and request.method == 'GET':
+        category_id = request.GET.get('category_id')
+        
+        # Retrieve item names based on the selected category
+        items = Itemsmodel.objects.filter(category=category_id).values_list('name', flat=True)
+        item_names = list(items)
+        
+        return JsonResponse({'items': item_names})
+    else:
+        return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
 
 def account_pay(request):
     if request.user.is_authenticated:
@@ -401,7 +443,6 @@ def add_category(request):
         return redirect ('user_login')
 
 def add_CatItems(request):
-    if request.user.is_authenticated==True:
         if request.method == 'POST':
             form = AddItemsform(request.POST)
             if form.is_valid():
@@ -418,8 +459,7 @@ def add_CatItems(request):
         }
 
         return render(request, 'add_item_name.html', context)
-    else:
-        return redirect ('user_login')
+
 
 
 
@@ -730,8 +770,6 @@ def add_expense(request):
                 total_cash = AddCash.objects.first()
                 total_cash.cash -= amount  # Subtract the amount from the cash attribute
                 total_cash.save()
-                return redirect('expenses_list')
-        
 
         else:
             form = AddExpenseForm()
@@ -799,6 +837,7 @@ def sales_return(request):
     if request.user.is_authenticated==True:
         if request.method == 'POST':
             form = SalesReturnForm(request.POST)
+            formR = ReplacementSaleForm(request.POST)
             if form.is_valid():
                 batch_number = form.cleaned_data['batch_number']
                 category = form.cleaned_data['category']
@@ -808,6 +847,7 @@ def sales_return(request):
                 action = form.cleaned_data['action']
 
                 if action == 'defective':
+                    # Store the item in the Defective database
                     defective_item = DefectiveItem(
                         batch_number=batch_number,
                         category=category,
@@ -816,55 +856,13 @@ def sales_return(request):
                         quantity=quantity
                     )
                     defective_item.save()
-
+                    # Subtract the price from total_cash
                     total_cash = AddCash.objects.first()
                     if hasattr(total_cash, 'cash'):
-                        total_cash.cash -= price * quantity
+                        total_cash.cash -= price * quantity #changing
                         total_cash.save()
-
                     return redirect('/list_item')
 
-                # elif action=='replace':
-                #     # Store the item in the database without subtracting from AddCash
-                #     total_values_list = []
-                #     stock_item, created = Stock.objects.get_or_create(batch_number=batch_number,category=category, item_name=item_name)
-                #     stock_item.quantity += quantity
-                #     stock_item.save()
-                #     total_cash = AddCash.objects.first()
-                #     if hasattr(total_cash, 'cash'):
-                #         total_cash.cash -= price * quantity
-                #         total_cash.save()
-                    
-                #     # Calculate the total sales by calling the total_sales function
-                #     total_sales_value = total_sales(request)    
-                #     sales = Sale.objects.all()
-                #     for sale in sales:
-                #         stock = sale.stock
-                #         total_values = sale.sale_quantity * stock.rate
-                #         total_values_list.append({
-                #             'total_values': total_values,
-                #         })
-                        
-                #     total_expense= calculate_sum_Expense()        
-                #     COGS_sum = sum(sum(dictionary.values()) for dictionary in total_values_list)
-                #     GrossP = total_sales_value - COGS_sum
-                #     Net_Profit=GrossP-total_expense
-                #     total_sales_value = total_sales(request) 
-                    
-                #     print('COGS',total_sales_value - price )
-                #     print('COGS',COGS_sum )
-                #     print('COGS',GrossP )
-                #     print('COGS',Net_Profit)
-
-                #     #ye hehehjee
-                #     branch_id = request.POST.get('sale_cash')
-                #     branch_instance = ActionHistory.objects.get(pk=branch_id)
-                #     branch_instance.delete()
-                    
-                #     # return redirect('Replace_sale')
-                #     return redirect('make_sale')
-                    
-                    
 
                 else:
                     total_cash = AddCash.objects.first()
@@ -1259,10 +1257,16 @@ def index(request):
     return render(request, 'indexxx.html', {"form": form})
 
 def load_items(request):
-    category_id = request.GET.get("category")
+    category_id = request.GET.get('category_id')
     items = Itemsmodel.objects.filter(category_id=category_id)
-    return render(request, "item_options.html", {"items": items})
+    data = [{'id': item.id, 'name': item.name} for item in items]
+    return JsonResponse(data, safe=False)
 
+def my_new_load_item(request):  # Updated view name
+    category_id = request.GET.get('category_id')
+    items = Itemsmodel.objects.filter(category_id=category_id)
+    data = [{'id': item.id, 'name': item.name} for item in items]
+    return JsonResponse(data, safe=False)
 
 def add_stock(request):
     if request.method == 'POST':

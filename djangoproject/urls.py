@@ -1,34 +1,15 @@
-"""djangoproject URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/2.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
-from django.urls import path, include  
+from django.urls import path, include
 from stockmgmt import views
-# from django.contrib.auth import views as auth_views
-# from registration.backends.default import views as registration_views
 
-
-       
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     # path('accounts/', include('registration.backends.default.urls')),
     # path('loginn/',include('signin.urls')),
+    path('add_stock/', views.stock_create_view, name='add_stock'),  # Replace 'add_stock' with your desired URL name
+
     path('home/', views.home, name='home'),
-    path('list_item/', views.list_item),
-    path('add_items/', views.add_items, name='add_items'),
+    path('list_item/', views.list_item, name="list_item"),
     path('update_items/<str:pk>/', views.update_items, name="update_items"),
     path('delete_items/<str:pk>/', views.delete_items, name="delete_items"),
     path('stock_detail/<str:pk>/', views.stock_detail, name="stock_detail"),
@@ -56,7 +37,6 @@ urlpatterns = [
     path('purchase_record_list/', views.purchase_record_list, name='purchase_record_list'),
     path('sales_record_list/', views.sales_record_list, name='sales_record_list'),
     path('profit_loss/', views.Profit, name='profit_loss'),
-    path('purchase_items/', views.Add_itemTriger, name='purchase_items'),
     path('account_pay/', views.account_pay, name='account_pay'),
     path('stock_return/', views.stock_return, name='stock_return'),
     path('purchase_returns_records/', views.purchase_returns_records, name='purchase_returns_records'),
@@ -66,11 +46,13 @@ urlpatterns = [
     path('Replace-create-form/', views.Replace_create_form, name='Replace-create-form'),
     path('Replace_sale/', views.Replace_l, name='Replace_sale'),
     path('add_Equity/', views.add_Equity, name='add_Equity'),
+    path('get-items-by-category/', views.get_items_by_category, name='get_items_by_category'),
 
 
     path("admin/", admin.site.urls),
     path("index", views.index, name="index"),
-    path("load_items/", views.load_items, name="load_items"),  # Change the path to "load_items/"
+    path("load_items/", views.load_items, name="load_cities"),  # Change the path to "load_items/"
+    path('my_new_load_item/', views.my_new_load_item, name='my_new_load_item'),  # Updated URL pattern name
 
 
     path('delete_sale/<int:sale_id>/',views.delete_sale, name='delete_sale'),
@@ -87,6 +69,9 @@ urlpatterns = [
     path("logout/", views.user_logout, name="log_out"),
     path("changepassword/", views.user_change_password, name="changepassword"),
     path("userdetail/<int:id>", views.user_detail, name="user_detail"),
+    
+
+    
 
 
     # path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
@@ -101,8 +86,5 @@ urlpatterns = [
     # path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     # path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     
-
-
-
-#     path('list_history/', views.list_history, name='list_history'),
+    # path('list_history/', views.list_history, name='list_history'),
 ]
