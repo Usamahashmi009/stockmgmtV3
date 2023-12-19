@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block content %}
+
 <style>
     .bd-placeholder-img {
       font-size: 1.125rem;
@@ -46,7 +46,7 @@
 </style>
 
   
-
+{% block content %}
     <h2>Cost of Goods sold</h2>
     
     
@@ -60,49 +60,30 @@
                 <th>Sale Quantity</th>
                 <th>Stock Rate</th>
                 <th>Total Values</th>
+                <th>Delete/Edit</th>
             </tr>
         </thead>
         <tbody>
-            {% for values in total_values_list %}
+            {% for sale in all_sales %}
                 <tr>
-                    <td>{{ values.sale_datetime }}</td>
-                    <td>{{ values.category }}</td>
-                    <td>{{ values.item_name }}</td>
-                    <td>{{ values.sale_quantity }}</td>
-                    <td>{{ values.stock_rate }}</td>
-                    <td>{{ values.total_values }}</td>
-                    {% comment %} <td><a href="#" onclick="showDeleteConfirmation('{{ values.stock_rate }}', '{% url 'delete_sale' entry.id %}')">Delete</a></td> {% endcomment %}
+                    <td>{{ sale.Date_time }}</td>
+                    <td>{{ sale.stock.category }}</td>
+                    <td>{{ sale.stock.item_name }}</td>
+                    <td>{{ sale.sale_quantity }}</td>
+                    <td>{{ sale.stock.rate }}</td>
+                    <td>{{ sale.total_values }}</td>
 
+                    <td>
+                        <a href="{% url 'edit_sale' sale.id %}"class="btn btn-secondary btn-sm" style="width: 80px; height: 30px;">✏️Edit</a>
+                        |
+                        <a href="{% url 'delete_sales' sale.id %}" class="btn btn-danger btn-sm" style="width: 80px; height: 30px;">🗑️Delete</a>
+                    </td>
                 </tr>
             {% endfor %}
-            
         </tbody>
     </table>
+    {% endblock %}
+   
 
 
-    
-  <!-- Confirmation Pop-up -->
-  <div class="overlay" id="confirmationOverlay">
-    <div class="confirmation-box">
-        <h2>Confirm Deletion</h2>
-        <p id="confirmationText"></p>
-        <form method="post" action="" id="confirmationForm">
-            {% csrf_token %}
-            <button type="submit">Delete</button>
-        </form>
-        <button onclick="hideConfirmation()">Cancel</button>
-    </div>
-</div>
 
-<script>
-    function showDeleteConfirmation(price, deleteUrl) {
-        document.getElementById('confirmationText').innerHTML = "Are you sure you want to delete " + price + "?";
-        document.getElementById('confirmationForm').action = deleteUrl;
-        document.getElementById('confirmationOverlay').style.display = 'flex';
-    }
-
-    function hideConfirmation() {
-        document.getElementById('confirmationOverlay').style.display = 'none';
-    }
-</script>
-{% endblock %}

@@ -6,20 +6,28 @@ from django.forms.widgets import Select
 from django.contrib.auth.forms import UserCreationForm , UserChangeForm
 from django import forms
 from django.contrib.auth.models import User
-from dynamic_forms import DynamicField, DynamicFormMixin
-
-
-# class universityform(forms.Form):
-#     category=forms.ModelChoiceField(
-#         queryset=Category.objects.all(),
-#         initial=Category.objects.first(),
-#     )
-
+from django import forms
+from .models import Stock, Category, Itemsmodel
 
 class StockCreateForm(forms.ModelForm):
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.all(),
+        widget=forms.Select(attrs={"hx-get": "my_new_load_item/", "hx-target": "#id_item"})
+    )
+    item = forms.ModelChoiceField(queryset=Itemsmodel.objects.none())
+
     class Meta:
         model = Stock
-        fields = ['vender', 'category', 'item_name', 'quantity', 'rate', 'company','account_payable']
+        fields = ['vender', 'category','item', 'quantity', 'rate', 'company', 'account_payable']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.category_id:  # Check if category_id exists (assuming it's a ForeignKey)
+            category_id = self.instance.category_id
+            self.fields['item'].queryset = Itemsmodel.objects.filter(category_id=category_id)
+        elif 'category' in self.data:
+            category_id = int(self.data.get('category'))
+            self.fields['item'].queryset = Itemsmodel.objects.filter(category_id=category_id)
 
 
 class BatchForm(forms.ModelForm):
@@ -28,7 +36,7 @@ class BatchForm(forms.ModelForm):
         fields = ['batch_number']
 
 
-    
+
 class StockSearchForm(forms.ModelForm):
     export_to_CSV = forms.BooleanField(required=False)
 
@@ -92,7 +100,7 @@ class SaleForm(forms.ModelForm):
     #     self.fields['stock'].widget = CustomStockWidget()
 
 
-       
+
 class AddExpenseForm(forms.ModelForm):
     class Meta:
         model = Expenses
@@ -106,7 +114,7 @@ class AddVenderForm(forms.ModelForm):
         model = Vender
         fields = ['name']
 
-    
+
 
 
 class ExpenseCatForm(forms.ModelForm):
@@ -120,6 +128,8 @@ class StockUpdateForm(forms.ModelForm):
     class Meta:
         model = Stock
         fields = ['category', 'item_name', 'quantity','rate']
+
+
 
 
 
@@ -143,18 +153,29 @@ class AddCashForm(forms.ModelForm):
         fields = ['cash']
 
 
+class UpdateCashForm(forms.ModelForm):
+    class Meta:
+        model = AddCash
+        fields = '__all__'
+
+
+class UpdateItemsForm(forms.ModelForm):
+    class Meta:
+        model = Itemsmodel
+        fields = ['name']
+
+
 
 class AddItemsform(forms.ModelForm):
     class Meta:
         model = Itemsmodel
-        fields = ['name' ]
-
+        fields = ['category','name' ]
 
 
 class SalesReturnForm(forms.Form):
     batch_number = forms.ChoiceField(choices=[], required=False)
     category = forms.ModelChoiceField(queryset=Category.objects.all())
-    item_name = forms.ModelChoiceField(queryset=Itemsmodel.objects.all())
+    item_name = forms.ModelChoiceField(queryset=Itemsmodel.objects.none())
     price = forms.IntegerField()
     quantity = forms.IntegerField()
     action = forms.ChoiceField(
@@ -163,11 +184,21 @@ class SalesReturnForm(forms.Form):
         required=False
     )
 
-
     def __init__(self, *args, **kwargs):
         super(SalesReturnForm, self).__init__(*args, **kwargs)
         distinct_batch_numbers = Stock.objects.values_list('batch_number', flat=True).distinct()
         self.fields['batch_number'].choices = [(batch_number, batch_number) for batch_number in distinct_batch_numbers]
+
+        # Add the widget attributes for HX
+        self.fields['category'].widget.attrs['hx-get'] = "my_new_load_item/"
+        self.fields['category'].widget.attrs['hx-target'] = "#id_item"
+
+        # Populate items based on the selected category
+        if 'category' in self.data:
+            category_id = int(self.data.get('category'))
+            self.fields['item_name'].queryset = Itemsmodel.objects.filter(category_id=category_id)
+
+# Note: The `widget.attrs` assignment is a quick way to add attributes to the widget.
 
 # class ReplacementForm(forms.Form):
 #     batch_number = forms.ChoiceField(choices=[], required=False, )
@@ -252,7 +283,7 @@ class OwnerEquityeForm(forms.ModelForm):
 
 class ItemForm(forms.Form):
     category = forms.ModelChoiceField(queryset=Category.objects.all(),
-                                     widget=forms.Select(attrs={"hx-get": "load_items/", "hx-target": "#id_item"}))
+                                        widget=forms.Select(attrs={"hx-get": "load_items/", "hx-target": "#id_item"}))
     item = forms.ModelChoiceField(queryset=Itemsmodel.objects.none())
 
     def __init__(self, *args, **kwargs):

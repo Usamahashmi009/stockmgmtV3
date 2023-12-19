@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'crispy_bootstrap4',
     'widget_tweaks',
     'django_htmx',
+    'admin_argon.apps.AdminArgonConfig',
     
 
     

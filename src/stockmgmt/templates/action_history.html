@@ -104,7 +104,7 @@
             <th>Sale Amount</th>
             <th>Cash in hand</th>
             <th>Timestamp</th>
-            {% comment %} <th>action</th> {% endcomment %}
+            <th>action</th>
         </tr>
     </thead>
     <tbody>
@@ -116,7 +116,7 @@
             <td>{{ entry.sale_cash }}</td>
             <td>{{ entry.cash_hand }}</td>
             <td>{% if entry.cash %}{{ entry.cash.timestamp }}{% else %}{{ entry.timestamp }}{% endif %}</td>
-            {% comment %} <td><a href="#" onclick="showDeleteConfirmation('{{ entry.sale_cash }}', '{% url 'delete_sale' entry.id %}')">Delete</a></td> {% endcomment %}
+            <td><a href="#" onclick="showDeleteConfirmation('{{ entry.sale_cash }}', '{% url 'delete_sale_action' entry.id %}')" class="btn btn-danger btn-sm" style="width: 80px; height: 30px;">🗑️Delete</a></td>
         </tr>
         {% endfor %}
     </tbody>

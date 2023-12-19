@@ -19,7 +19,7 @@
 <link href="{% static 'css/stylesheet.css' %}" rel="stylesheet">
 <!--<link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet"> -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-  
+
 
 
     <style>
@@ -39,7 +39,7 @@
       }
     </style>
     <!-- Custom styles for this template -->
-    
+
 	<link href="{% static 'css/navbar-top-fixed.css' %}" rel="stylesheet">
   </head>
   <body>
@@ -47,23 +47,48 @@
 
 
     <div class="jumbotron">
-        <h1>Add Cash</h1>
+        <h3>Add Cash</h3>
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <button type="submit">Add Cash</button>
+            <button type="submit" class="btn btn-primary ">Add Cash</button>
         </form>
-    
-        {% comment %} <h2>Cash Records</h2> {% endcomment %}
-        {% comment %} <ul>
-            {% for record in cash_records %}
-                <li>{{ record.cash }}</li>
-            {% endfor %}
-        </ul> {% endcomment %}
-    
-        <h3>Total Cash</h3>
-        <p>{{ total_cash }}</p>
-        
+<br> <br>
+        <h3 >Total Cash</h3>
+        <p><strong>{{ total_cash }}</p>
+
+
+        <h3 class = 'header' style="width: 30%;">Cash Records</h3>
+
+        <div class="table-responsive" style="width: 30%;">
+          <table class="table table-sm">
+              <thead>
+                  <tr>
+                      <th>Cash Record</th>
+                      <th>Edit</th>
+                      <th>Delete</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {% for record in cash_records %}
+                      <tr>
+                          <td><bold>{{ record.cash }}</td>
+                          <td>
+                            <a href="{% url 'update_cash' pk=record.id %}" class="btn btn-secondary btn-sm" style="width: 80px; height: 30px;" >
+                              ✏️Edit
+                            </a>
+
+                        </td>
+                        <td>
+                          <a href="{% url 'delete_cash' pk=record.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this record?')" style="width: 80px; height: 30px;">🗑️Delete</a>
+                        </td>
+                      </tr>
+                  {% endfor %}
+              </tbody>
+          </table>
+      </div>
+
+
     </div>
 
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
